@@ -1,4 +1,4 @@
-package repository
+package repository.tests
 
 import cats.data.Validated.Valid
 import cats.effect.IO
@@ -19,17 +19,16 @@ import models.Demonic
 import models.InProgress
 import repositories.QuestRepositoryImpl
 import repository.fragments.QuestRepoFragments.*
-import repository.RepositoryISpecBase
-import routes.Routes.estimateRoutes
 import scala.collection.immutable.ArraySeq
 import shared.TransactorResource
 import testData.ITestConstants.*
 import weaver.GlobalRead
 import weaver.IOSuite
 import weaver.ResourceTag
+import repository.RepositoryISpecBase
 
 class QuestRepositoryISpec(global: GlobalRead) extends IOSuite with RepositoryISpecBase {
-  
+
   type Res = QuestRepositoryImpl[IO]
 
   private def initializeSchema(transactor: TransactorResource): Resource[IO, Unit] =

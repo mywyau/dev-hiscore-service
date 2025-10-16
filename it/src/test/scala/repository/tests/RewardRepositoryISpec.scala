@@ -1,4 +1,4 @@
-package repository
+package repository.tests
 
 import cats.data.Validated.Valid
 import cats.effect.IO
@@ -6,19 +6,18 @@ import cats.effect.Resource
 import cats.implicits.*
 import doobie.*
 import doobie.implicits.*
-import models.NotPaid
+import java.time.LocalDateTime
 import models.database.*
 import models.rewards.*
+import models.NotPaid
 import repositories.RewardRepositoryImpl
-import repository.RepositoryISpecBase
 import repository.fragments.RewardRepoFragments.*
+import repository.RepositoryISpecBase
 import shared.TransactorResource
 import testData.ITestConstants.*
 import weaver.GlobalRead
 import weaver.IOSuite
 import weaver.ResourceTag
-
-import java.time.LocalDateTime
 
 class RewardRepositoryISpec(global: GlobalRead) extends IOSuite with RepositoryISpecBase {
   type Res = RewardRepositoryImpl[IO]
@@ -72,8 +71,8 @@ class RewardRepositoryISpec(global: GlobalRead) extends IOSuite with RepositoryI
     val expectedResult =
       originalReward.copy(
         timeRewardValue = Some(100.00),
-        completionRewardValue = Some(200),
-        )
+        completionRewardValue = Some(200)
+      )
 
     for {
       originalData <- rewardRepo.getRewardData("QUEST002")
@@ -81,7 +80,7 @@ class RewardRepositoryISpec(global: GlobalRead) extends IOSuite with RepositoryI
         "QUEST002",
         UpdateRewardData(
           timeRewardValue = 100.00,
-          completionRewardValue = 200,
+          completionRewardValue = 200
         )
       )
       updatedReward <- rewardRepo.getRewardData("QUEST002")

@@ -56,7 +56,7 @@
 //   val kafkaConfig =
 //     KafkaConfig(
 //       bootstrapServers = "localhost:9092",
-//       clientId = "dev-quest-service",
+//       clientId = "dev-irl-client-payment-service",
 //       acks = "all",
 //       lingerMs = 5,
 //       retries = 10,

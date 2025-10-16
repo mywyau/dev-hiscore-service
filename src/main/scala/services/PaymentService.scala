@@ -7,22 +7,22 @@ import cats.effect.IO
 import cats.implicits.*
 import com.stripe.net.Webhook
 import configuration.AppConfig
-import io.circe.Json
 import io.circe.parser
 import io.circe.syntax.EncoderOps
+import io.circe.Json
 import io.github.cdimascio.dotenv.Dotenv
 import models.payment.CheckoutSessionUrl
 import models.payment.StripePaymentIntent
 import models.responses.*
 import org.http4s.*
-import org.http4s.Header
 import org.http4s.circe.*
 import org.http4s.client.Client
 import org.http4s.syntax.all.uri
+import org.http4s.Header
 import org.typelevel.ci.CIStringSyntax
 import org.typelevel.log4cats.Logger
-import repositories.QuestRepositoryAlgebra
-import repositories.RewardRepositoryAlgebra
+import repositories.*
+import services.*
 
 trait PaymentServiceAlgebra[F[_]] {
 

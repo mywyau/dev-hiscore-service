@@ -2,18 +2,22 @@
 
 package controllers
 
-import infrastructure.cache.SessionCacheAlgebra
 import cats.data.Validated.Invalid
 import cats.data.Validated.Valid
 import cats.effect.*
-import cats.effect.Concurrent
 import cats.effect.kernel.Async
+import cats.effect.Concurrent
 import cats.implicits.*
 import fs2.Stream
+import infrastructure.cache.SessionCacheAlgebra
 import io.circe.*
-import io.circe.Json
 import io.circe.syntax.*
 import io.circe.syntax.EncoderOps
+import io.circe.Json
+import models.database.UpdateSuccess
+import models.payment.CheckoutPaymentPayload
+import models.quests.*
+import models.responses.*
 import models.Completed
 import models.Failed
 import models.InProgress
@@ -21,22 +25,17 @@ import models.NotStarted
 import models.QuestStatus
 import models.Review
 import models.Submitted
-import models.database.UpdateSuccess
-import models.payment.CheckoutPaymentPayload
-import models.quests.*
-import models.responses.*
 import org.http4s.*
-import org.http4s.Challenge
 import org.http4s.circe.*
-import org.http4s.dsl.Http4sDsl
 import org.http4s.dsl.impl.OptionalQueryParamDecoderMatcher
+import org.http4s.dsl.Http4sDsl
 import org.http4s.headers.`WWW-Authenticate`
 import org.http4s.syntax.all.http4sHeaderSyntax
+import org.http4s.Challenge
 import org.typelevel.ci.CIString
 import org.typelevel.log4cats.Logger
-import services.PaymentServiceAlgebra
-
 import scala.concurrent.duration.*
+import services.PaymentServiceAlgebra
 
 trait PaymentControllerAlgebra[F[_]] {
   def routes: HttpRoutes[F]
@@ -72,7 +71,7 @@ class PaymentControllerImpl[F[_] : Async : Concurrent : Logger](
 
     case req @ GET -> Root / "payment" / "health" =>
       Logger[F].debug(s"[PaymentController] GET - Health check for backend PaymentController") *>
-        Ok(GetResponse("/dev-quest-service/payment/health", "I am alive - PaymentController").asJson)
+        Ok(GetResponse("/dev-irl-client-payment-service/payment/health", "I am alive - PaymentController").asJson)
 
     // Client triggers this to pay a developer for a quest - Not used
     case req @ POST -> Root / "pay" / clientId / questId =>

@@ -1,39 +1,40 @@
-package modules
+// TODO possibly remove
 
-// modules/JobsModule.scala
+// package modules
 
-import cats.effect.*
-import cats.syntax.all.catsSyntaxApplicativeError
-import cats.NonEmptyParallel
-import configuration.AppConfig
-import doobie.hikari.HikariTransactor
-import fs2.Stream
-import jobs.EstimateServiceBuilder
-import org.typelevel.log4cats.Logger
-import scala.concurrent.duration.DurationInt
-import services.kafka.producers.QuestEstimationEventProducerAlgebra
+// // modules/JobsModule.scala
 
-object JobsModule {
+// import cats.effect.*
+// import cats.syntax.all.catsSyntaxApplicativeError
+// import cats.NonEmptyParallel
+// import configuration.AppConfig
+// import doobie.hikari.HikariTransactor
+// import fs2.Stream
+//
+// import org.typelevel.log4cats.Logger
+// import scala.concurrent.duration.DurationInt
 
-  def estimationFinalizerStream[F[_] : Concurrent : Temporal : NonEmptyParallel : Async : Logger : Clock](
-    cfg: AppConfig,
-    xa: HikariTransactor[F],
-    questEstimationEventProducer: QuestEstimationEventProducerAlgebra[F]
-  ): Stream[F, Unit] = {
+// object JobsModule {
 
-    val estimateService = EstimateServiceBuilder.build[F](xa, cfg, questEstimationEventProducer)
+//   def estimationFinalizerStream[F[_] : Concurrent : Temporal : NonEmptyParallel : Async : Logger : Clock](
+//     cfg: AppConfig,
+//     xa: HikariTransactor[F],
+//     questEstimationEventProducer: QuestEstimationEventProducerAlgebra[F]
+//   ): Stream[F, Unit] = {
 
-    val runOnce =
-      estimateService
-        .finalizeExpiredEstimations()
-        .handleErrorWith(e => Logger[F].warn(e)("estimation finalizer failed"))
+//     val estimateService = EstimateServiceBuilder.build[F](xa, cfg, questEstimationEventProducer)
 
-    val cadence: Stream[F, Unit] =
-      if (cfg.featureSwitches.localTesting)
-        Stream.fixedRateStartImmediately[F](cfg.estimationConfig.intervalSeconds.seconds).evalMap(_ => runOnce)
-      else
-        Stream.awakeEvery[F](6.hours).evalMap(_ => runOnce)
+//     val runOnce =
+//       estimateService
+//         .finalizeExpiredEstimations()
+//         .handleErrorWith(e => Logger[F].warn(e)("estimation finalizer failed"))
 
-    Stream.eval(runOnce) ++ cadence
-  }
-}
+//     val cadence: Stream[F, Unit] =
+//       if (cfg.featureSwitches.localTesting)
+//         Stream.fixedRateStartImmediately[F](cfg.estimationConfig.intervalSeconds.seconds).evalMap(_ => runOnce)
+//       else
+//         Stream.awakeEvery[F](6.hours).evalMap(_ => runOnce)
+
+//     Stream.eval(runOnce) ++ cadence
+//   }
+// }

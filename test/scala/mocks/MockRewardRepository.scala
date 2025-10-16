@@ -4,7 +4,6 @@ import cats.data.Validated.Valid
 import cats.data.ValidatedNel
 import cats.effect.IO
 import fs2.Stream
-import models.RewardStatus
 import models.database.*
 import models.rewards.*
 import repositories.RewardRepositoryAlgebra

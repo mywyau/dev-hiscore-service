@@ -1,42 +1,44 @@
-// modules/KafkaModule.scala
-package modules
+// TODO refactor into payment related kafka producer
 
-import cats.effect._
-import fs2.kafka._
-import services.kafka.producers._
-import infrastructure.KafkaProducerProvider
-import configuration.AppConfig
-import org.typelevel.log4cats.Logger
+// // modules/KafkaModule.scala
+// package modules
 
-final case class KafkaProducers[F[_]](
-  questEstimationProducer: QuestEstimationEventProducerAlgebra[F],
-  questEventProducer: QuestEventProducerAlgebra[F]
-)
+// import cats.effect._
+// import fs2.kafka._
+// import services.kafka.producers._
+// import infrastructure.KafkaProducerProvider
+// import configuration.AppConfig
+// import org.typelevel.log4cats.Logger
 
-object KafkaModule {
+// final case class KafkaProducers[F[_]](
+//   questEstimationProducer: QuestEstimationEventProducerAlgebra[F],
+//   questEventProducer: QuestEventProducerAlgebra[F]
+// )
 
-  def make[F[_]: Async: Logger](appConfig: AppConfig): Resource[F, KafkaProducers[F]] = {
-    for {
-      // ✅ Use your existing provider
-      producer <- KafkaProducerProvider.make[F](
-        bootstrap = appConfig.kafka.bootstrapServers,
-        clientId = appConfig.kafka.clientId,
-        acks = appConfig.kafka.acks,
-        lingerMs = appConfig.kafka.lingerMs,
-        retries = appConfig.kafka.retries
-      )
+// object KafkaModule {
 
-      // ✅ Use it in your producers
-      questEstimationProducer = new QuestEstimationEventProducerImpl[F](
-        appConfig.kafka.topic.estimationFinalized,
-        producer
-      )
+//   def make[F[_]: Async: Logger](appConfig: AppConfig): Resource[F, KafkaProducers[F]] = {
+//     for {
+//       // ✅ Use your existing provider
+//       producer <- KafkaProducerProvider.make[F](
+//         bootstrap = appConfig.kafka.bootstrapServers,
+//         clientId = appConfig.kafka.clientId,
+//         acks = appConfig.kafka.acks,
+//         lingerMs = appConfig.kafka.lingerMs,
+//         retries = appConfig.kafka.retries
+//       )
 
-      questEventProducer = new QuestEventProducerImpl[F](
-        appConfig.kafka.topic.questCreated,
-        producer
-      )
+//       // ✅ Use it in your producers
+//       // questEstimationProducer = new QuestEstimationEventProducerImpl[F](
+//       //   appConfig.kafka.topic.estimationFinalized,
+//       //   producer
+//       // )
 
-    } yield KafkaProducers(questEstimationProducer, questEventProducer)
-  }
-}
+//       // questEventProducer = new QuestEventProducerImpl[F](
+//       //   appConfig.kafka.topic.questCreated,
+//       //   producer
+//       // )
+
+//     } yield KafkaProducers(questEstimationProducer, questEventProducer)
+//   }
+// }

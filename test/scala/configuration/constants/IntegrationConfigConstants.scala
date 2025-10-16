@@ -14,25 +14,6 @@ object IntegrationConfigConstants {
       useProdStripe = false
     )
 
-  val devSubmissionConfig =
-    DevSubmissionConfig(
-      expiryDays = 730
-    )
-
-  val questConfig =
-    QuestConfig(
-      maxActiveQuests = 5,
-      bronzeXp = 1000.00,
-      ironXp = 2000.00,
-      steelXp = 3000.00,
-      mithrilXp = 4000.00,
-      adamantiteXp = 5000.00,
-      runicXp = 6000.00,
-      demonicXp = 7000.00,
-      ruinXp = 8000.00,
-      aetherXp = 10000.00
-    )
-
   val itDevIrlFrontendConfig =
     DevIrlFrontendConfig(
       host = "0.0.0.0",
@@ -40,26 +21,10 @@ object IntegrationConfigConstants {
       baseUrl = "http://localhost:3000"
     )
 
-  val estimateConfig =
-    EstimationConfig(
-      localBucketSeconds = 10,
-      localMinimumEstimationWindowSeconds = 30,
-      prodBucketSeconds = 21600,
-      prodMinimumEstimationWindowSeconds = 72000,
-      intervalSeconds = 30,
-      estimationThreshold = 3,
-      maxDailyEstimates = 5
-    )
-
-  val pricingPlanConfig =
-    PricingPlanConfig(
-      cacheTtlMinutes = 60
-    )
-
   val kafkaConfig =
     KafkaConfig(
       bootstrapServers = "localhost:9092",
-      clientId = "dev-quest-service",
+      clientId = "dev-irl-client-payment-service",
       acks = "all",
       lingerMs = 5,
       retries = 10,
@@ -93,15 +58,6 @@ object IntegrationConfigConstants {
       port = 6380
     )
 
-  val itS3Config =
-    S3Config(
-      awsRegion = "us-east-1",
-      bucketName = "dev-submissions",
-      dockerName = "localstack",
-      host = "localhost",
-      port = 4566
-    )
-
   val itStripeConfig =
     StripeConfig(
       registrationRefreshUrl = "http://localhost:3000/dev/stripe/onboarding/refresh",
@@ -112,28 +68,14 @@ object IntegrationConfigConstants {
       platformFeePercent = 2.5
     )
 
-  val integrationSpecConfig =
-    IntegrationSpecConfig(
-      serverConfig = itSpecServerConfig,
-      postgresqlConfig = itPostgresqlConfig,
-      redisConfig = itRedisConfig,
-      awsS3Config = itS3Config,
-      stripeConfig = itStripeConfig
-    )
-
   val integrationAppConfigConstant =
     AppConfig(
       featureSwitches = featureSwitches,
-      pricingPlanConfig = pricingPlanConfig,
-      devSubmission = devSubmissionConfig,
       kafka = kafkaConfig,
-      questConfig = questConfig,
-      estimationConfig = estimateConfig,
       devIrlFrontendConfig = itDevIrlFrontendConfig,
       serverConfig = itSpecServerConfig,
       postgresqlConfig = itPostgresqlConfig,
       redisConfig = itRedisConfig,
-      awsS3Config = itS3Config,
       stripeConfig = itStripeConfig
     )
 }

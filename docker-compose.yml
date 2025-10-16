@@ -5,12 +5,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: dev-quest-service-app
+    container_name: dev-irl-client-payment-service-app
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_NAME: dev_quest
-      DB_USER: dev_quest_user
+      DB_NAME: dev_stripe
+      DB_USER: dev_stripe_user
       DB_PASSWORD: turnip
     ports:
       - "8080:8080"

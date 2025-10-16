@@ -6,7 +6,6 @@ import pureconfig.generic.derivation.*
 import pureconfig.ConfigReader
 
 case class LocalAppConfig(
-  awsS3Config: S3Config,
   devIrlFrontendConfig: DevIrlFrontendConfig,
   postgresqlConfig: PostgresqlConfig,
   redisConfig: RedisConfig,

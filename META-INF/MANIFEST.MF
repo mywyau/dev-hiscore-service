@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Main-Class: Main
-Specification-Title: dev-quest-service
+Specification-Title: dev-irl-client-payment-service
 Specification-Version: 0.1.0-SNAPSHOT
-Specification-Vendor: dev-quest-service
-Implementation-Title: dev-quest-service
+Specification-Vendor: dev-irl-client-payment-service
+Implementation-Title: dev-irl-client-payment-service
 Implementation-Version: 0.1.0-SNAPSHOT
-Implementation-Vendor: dev-quest-service
-Implementation-Vendor-Id: dev-quest-service
+Implementation-Vendor: dev-irl-client-payment-service
+Implementation-Vendor-Id: dev-irl-client-payment-service
 

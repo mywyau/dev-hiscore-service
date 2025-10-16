@@ -19,7 +19,7 @@ object AppModule {
     httpClient: Client[F]
   ): Resource[F, Unit] =
     for {
-      kafkaProducers <- KafkaModule.make[F](appConfig)
+      // kafkaProducers <- KafkaModule.make[F](appConfig)
 
       // Run Kafka consumers
       // consumerStream <- KafkaConsumers.questCreatedStream[F](appConfig)
@@ -35,6 +35,12 @@ object AppModule {
       // )
 
       // Start HTTP server
-      _ <- HttpModule.make[F](appConfig, transactor, redis, httpClient, kafkaProducers)
+      _ <- HttpModule.make[F](
+        appConfig,
+        transactor,
+        redis,
+        httpClient,
+        // kafkaProducers
+      )
     } yield ()
 }

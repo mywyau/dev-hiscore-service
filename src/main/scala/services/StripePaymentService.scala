@@ -22,8 +22,6 @@ import org.http4s.client.Client
 import org.http4s.syntax.all.uri
 import org.typelevel.ci.CIStringSyntax
 import org.typelevel.log4cats.Logger
-import repositories.QuestRepositoryAlgebra
-import repositories.RewardRepositoryAlgebra
 
 class StripePaymentService[F[_] : Async : Logger](
   appConfig: AppConfig,

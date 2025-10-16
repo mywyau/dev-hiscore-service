@@ -7,18 +7,10 @@ import pureconfig.generic.derivation.*
 
 case class AppConfig(
   featureSwitches: FeatureSwitches,
-  pricingPlanConfig: PricingPlanConfig,
-  devSubmission: DevSubmissionConfig,
-  kafka: KafkaConfig,
-  redisConfig: RedisConfig,
-  questConfig: QuestConfig,
-  estimationConfig: EstimationConfig,
   devIrlFrontendConfig: DevIrlFrontendConfig,
-  serverConfig: ServerConfig,
+  kafka: KafkaConfig,
   postgresqlConfig: PostgresqlConfig,
-  awsS3Config: S3Config,
+  redisConfig: RedisConfig,
+  serverConfig: ServerConfig,
   stripeConfig: StripeConfig
-  // localAppConfig: LocalAppConfig,
-  // prodAppConfig: ProdAppConfig,
-  // integrationSpecConfig: IntegrationSpecConfig
 ) derives ConfigReader
