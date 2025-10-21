@@ -14,17 +14,9 @@ import io.circe.*
 import io.circe.syntax.*
 import io.circe.syntax.EncoderOps
 import io.circe.Json
-import models.database.UpdateSuccess
 import models.payment.CheckoutPaymentPayload
 import models.quests.*
 import models.responses.*
-import models.Completed
-import models.Failed
-import models.InProgress
-import models.NotStarted
-import models.QuestStatus
-import models.Review
-import models.Submitted
 import org.http4s.*
 import org.http4s.circe.*
 import org.http4s.dsl.impl.OptionalQueryParamDecoderMatcher
@@ -80,7 +72,6 @@ class PaymentControllerImpl[F[_] : Async : Concurrent : Logger](
           withValidSession(clientId, cookieToken) {
             for {
               json <- req.as[Json]
-              // devId <- questService
               developerStripeId <- json.hcursor.get[String]("developerStripeId").liftTo[F]
               amountCents <- json.hcursor.get[Long]("amountCents").liftTo[F]
 
