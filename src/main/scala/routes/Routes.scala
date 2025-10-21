@@ -5,7 +5,6 @@ import cats.NonEmptyParallel
 import configuration.AppConfig
 import controllers.*
 import doobie.hikari.HikariTransactor
-import infrastructure.cache.RedisCacheImpl
 import infrastructure.cache.SessionCache
 import infrastructure.cache.SessionCacheImpl
 import java.net.URI

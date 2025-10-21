@@ -58,13 +58,6 @@ object TestRoutes extends BaseAppConfig {
         appConfig.kafka.lingerMs,
         appConfig.kafka.retries
       )
-      // consumerStream <- QuestCreatedConsumer.resource[IO](QuestCreatedConsumer.Settings(bootstrapServers = appConfig.kafka.bootstrapServers))
-      // _ <- Resource
-      //   .make(Concurrent[IO].start(consumerStream.compile.drain))(_.cancel)
-      //   .void
-
-      // questEventProducer = new QuestEventProducerImpl[IO](appConfig.kafka.topic.questCreated, kafkaProducer)
-
     } yield Router(
       "/dev-irl-client-payment-service" -> (
         baseRoutes()

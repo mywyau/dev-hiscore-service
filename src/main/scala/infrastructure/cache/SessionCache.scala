@@ -152,8 +152,8 @@ class SessionCacheImpl[F[_] : Async : Logger](redisHost: String, redisPort: Int,
 
 object SessionCache {
 
-  import dev.profunktor.redis4cats.effect.Log.Stdout.given // With logs
-  // import dev.profunktor.redis4cats.effect.Log.NoOp.given // No logs
+  // import dev.profunktor.redis4cats.effect.Log.Stdout.given // With logs
+  import dev.profunktor.redis4cats.effect.Log.NoOp.given // No logs
 
   def apply[F[_] : Async : Logger](redisHost: String, redisPort: Int, appConfig: AppConfig): SessionCacheAlgebra[F] =
     new SessionCacheImpl[F](redisHost, redisPort, appConfig)
