@@ -58,7 +58,7 @@ jobs:
       - name: Save image tag to SSM
         run: |
           aws ssm put-parameter \
-            --name /devquest/backend/image-tag \
+            --name /devirlclientpayment/backend/image-tag \
             --value ${{ github.sha }} \
             --type String \
             --overwrite \
