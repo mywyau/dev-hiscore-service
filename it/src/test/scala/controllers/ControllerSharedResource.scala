@@ -81,10 +81,9 @@ object ControllerSharedResource extends GlobalResource with BaseAppConfig {
       }
       ce <- executionContextResource
       xa <- transactorResource(postgresqlConfig.copy(host = postgresqlHost, port = postgresqlPort), ce)
-      // redis <- RedisCache.make[IO](redisHost, redisPort, appConfig)
-      sessionCache <- SessionCache.make[IO](redisHost, redisPort, appConfig)
+      sessionCache <- SessionCache.make[IO](appConfig)
       client <- clientResource
-      _ <- serverResource(host, port, createTestRouter(xa, appConfig))
+      _ <- serverResource(host, port, createTestRouter(appConfig, xa))
       _ <- global.putR(TransactorResource(xa))
       _ <- global.putR(HttpClientResource(client))
       _ <- global.putR(SessionCacheResource(sessionCache))

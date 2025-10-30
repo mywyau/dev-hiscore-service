@@ -10,7 +10,7 @@ import models.languages.Language
 import models.QuestStatus
 import models.Rank
 
-case class QuestPartial(
+case class QuestData(
   questId: String,
   clientId: String,
   devId: Option[String],
@@ -23,7 +23,7 @@ case class QuestPartial(
   estimated: Boolean
 )
 
-object QuestPartial {
-  implicit val encoder: Encoder[QuestPartial] = deriveEncoder[QuestPartial]
-  implicit val decoder: Decoder[QuestPartial] = deriveDecoder[QuestPartial]
+object QuestData {
+  implicit val encoder: Encoder[QuestData] = deriveEncoder[QuestData]
+  implicit val decoder: Decoder[QuestData] = deriveDecoder[QuestData]
 }

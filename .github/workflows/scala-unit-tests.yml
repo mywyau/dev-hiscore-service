@@ -1,4 +1,4 @@
-name: dev-irl-client-payment-service Unit and Integration Tests
+name: devirl-auth-service Unit and Integration Tests
 
 on:
   push:
@@ -47,15 +47,12 @@ jobs:
     name: Run Integration Tests
     runs-on: ubuntu-latest
 
-    container:
-      image: openjdk:11
-
     env:
-      REDIS_HOST: redis
-      REDIS_PORT: "6379"
+      REDIS_HOST: localhost
+      REDIS_PORT: "6380"
 
-      DB_HOST: postgres
-      DB_PORT: "5432"
+      DB_HOST: localhost
+      DB_PORT: "5431"
       DB_USER: dev_quest_test_user
       DB_PASSWORD: turnip
       DB_NAME: dev_quest_test_db
@@ -64,8 +61,8 @@ jobs:
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
       AWS_DEFAULT_REGION: us-east-1
-      LOCALSTACK_HOST: localstack
-      AWS_ENDPOINT_URL: http://localstack:4566
+      LOCALSTACK_HOST: localhost
+      AWS_ENDPOINT_URL: http://localhost:4566
 
     services:
       postgres:
@@ -74,6 +71,8 @@ jobs:
           POSTGRES_USER: dev_quest_test_user
           POSTGRES_PASSWORD: turnip
           POSTGRES_DB: dev_quest_test_db
+        ports:
+          - 5431:5432
         options: >-
           --health-cmd "pg_isready -U dev_quest_test_user -d dev_quest_test_db"
           --health-interval 10s
@@ -82,28 +81,24 @@ jobs:
 
       redis:
         image: redis:7
+        ports:
+          - 6380:6379
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
 
-      # Add LocalStack service
       localstack:
         image: localstack/localstack:latest
         env:
-          SERVICES: "s3" # Specify the AWS services you need
+          SERVICES: "s3"
           DEBUG: "1"
           DOCKER_HOST: "unix:///var/run/docker.sock"
           DEFAULT_REGION: "us-east-1"
           DATA_DIR: "/tmp/localstack/data"
         ports:
-          - "4566:4566" # LocalStack default port
-        # healthcheck:
-        #   test: ["CMD-SHELL", "curl -f http://localhost:4566/health || exit 1"]
-        #   interval: 10s
-        #   timeout: 5s
-        #   retries: 5
+          - "4566:4566"
 
     steps:
       - name: Checkout code
@@ -136,12 +131,12 @@ jobs:
         run: sbt update
 
       - name: Install redis-cli
-        run: apt-get update && apt-get install -y redis-tools
+        run: sudo apt-get update && sudo apt-get install -y redis-tools
 
       - name: Wait for Redis
         run: |
           for i in {1..30}; do
-            if redis-cli -h redis -p 6379 ping | grep PONG; then
+            if redis-cli -h localhost -p 6380 ping | grep PONG; then
               echo "Redis is ready";
               break;
             fi
@@ -150,14 +145,14 @@ jobs:
           done
 
       - name: Install PostgreSQL Client
-        run: apt-get update && apt-get install -y postgresql-client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
       - name: Wait for PostgreSQL
         env:
           PGPASSWORD: turnip
         run: |
           for i in {1..30}; do
-            if pg_isready -h postgres -p 5432 -U dev_quest_test_user; then
+            if pg_isready -h localhost -p 5431 -U dev_quest_test_user; then
               echo "Postgres is ready";
               break;
             fi
@@ -169,24 +164,21 @@ jobs:
         env:
           PGPASSWORD: turnip
         run: |
-          psql -h postgres -p 5432 -U dev_quest_test_user -d postgres -c "DROP DATABASE IF EXISTS dev_quest_test_db;"
-          psql -h postgres -p 5432 -U dev_quest_test_user -d postgres -c "CREATE DATABASE dev_quest_test_db;"
+          psql -h localhost -p 5431 -U dev_quest_test_user -d postgres -c "DROP DATABASE IF EXISTS dev_quest_test_db;"
+          psql -h localhost -p 5431 -U dev_quest_test_user -d postgres -c "CREATE DATABASE dev_quest_test_db;"
 
-      - name: Install AWS CLI v2 (no sudo)
-        run: |
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
-          unzip /tmp/awscliv2.zip -d /tmp
-          /tmp/aws/install -i /tmp/aws-cli -b /tmp/aws-bin
-        shell: bash
+      # - name: Install AWS CLI v2 (no sudo)
+      #   run: |
+      #     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+      #     unzip /tmp/awscliv2.zip -d /tmp
+      #     sudo /tmp/aws/install -i /usr/local/aws-cli -b /usr/local/bin
+      #   shell: bash
 
-      - name: Add AWS CLI to PATH
-        run: echo "/tmp/aws-bin" >> $GITHUB_PATH
-
-      - name: Create S3 bucket “test-bucket”
-        run: |
-          aws --endpoint-url=${AWS_ENDPOINT_URL} \
-              s3api create-bucket \
-              --bucket test-bucket
+      # - name: Create S3 bucket “test-bucket”
+      #   run: |
+      #     aws --endpoint-url=${AWS_ENDPOINT_URL} \
+      #         s3api create-bucket \
+      #         --bucket test-bucket   
 
       - name: Run Integration Tests
         run: sbt it/test

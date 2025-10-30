@@ -23,20 +23,34 @@ import org.http4s.syntax.all.uri
 import org.typelevel.ci.CIStringSyntax
 import org.typelevel.log4cats.Logger
 
-class StripePaymentService[F[_] : Async : Logger](
-  appConfig: AppConfig,
-  client: Client[F]
-) {
+
+trait StripePaymentServiceAlgebra[F[_]] {
+
+ def createPaymentIntent(amount: Long,currency: String,devAccountId: String): F[StripePaymentIntent] 
+
+ def verifyWebhook(payload: String, sig: String): F[Json]
+
+ def createCheckoutSession(
+    questId: String,
+    clientId: String,
+    developerStripeId: String,
+    amount: Long,
+    currency: String
+  ): F[CheckoutSessionUrl]
+
+}
+
+class StripePaymentService[F[_] : Async : Logger](appConfig: AppConfig, client: Client[F]) extends StripePaymentServiceAlgebra[F] {
 
   // fall back is .env not app config but in prod/infra we use aws secrets for the sys variables
-  val secretKey: String = 
+  private val secretKey: String = 
     if (appConfig.featureSwitches.localTesting) {
       sys.env.getOrElse("STRIPE_TEST_SECRET_KEY", Dotenv.load().get("STRIPE_TEST_SECRET_KEY"))          
     } else  {
       sys.env.getOrElse("STRIPE_TEST_SECRET_KEY", "")
     }
 
-  val webhookSecret: String = 
+  private val webhookSecret: String = 
     if (appConfig.featureSwitches.localTesting) {
       sys.env.getOrElse("STRIPE_TEST_WEBHOOK_SECRET", Dotenv.load().get("STRIPE_TEST_WEBHOOK_SECRET"))          
     } else  {
@@ -47,7 +61,7 @@ class StripePaymentService[F[_] : Async : Logger](
     Uri.fromString(appConfig.stripeConfig.stripeUrl)
       .getOrElse(sys.error(s"Invalid Stripe URL: ${appConfig.stripeConfig.stripeUrl}"))
 
-  val platformFeePercent: BigDecimal =
+  private val platformFeePercent: BigDecimal =
     sys.env
       .get("STRIPE_PLATFORM_FEE_PERCENT")
       .flatMap(s => Either.catchOnly[NumberFormatException](BigDecimal(s)).toOption)
@@ -56,7 +70,7 @@ class StripePaymentService[F[_] : Async : Logger](
   private def authHeader: Header.Raw =
     Header.Raw(ci"Authorization", s"Bearer ${secretKey}")
 
-  def createPaymentIntent(
+  override def createPaymentIntent(
     amount: Long,
     currency: String,
     devAccountId: String
@@ -83,7 +97,7 @@ class StripePaymentService[F[_] : Async : Logger](
     }
   }
 
-  def verifyWebhook(payload: String, sig: String): F[Json] =
+  override def verifyWebhook(payload: String, sig: String): F[Json] =
     for {
       event <- Sync[F].delay {
         Webhook.constructEvent(
@@ -96,7 +110,7 @@ class StripePaymentService[F[_] : Async : Logger](
     } yield json
 
 
-  def createCheckoutSession(
+  override def createCheckoutSession(
     questId: String,
     clientId: String,
     developerStripeId: String,

@@ -5,6 +5,7 @@ import cats.NonEmptyParallel
 import com.comcast.ip4s.*
 import configuration.AppConfig
 import configuration.ConfigReader
+import connectors.QuestConnector
 import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
 import fs2.Stream
@@ -38,8 +39,6 @@ import routes.Routes.*
 import scala.concurrent.duration.*
 import scala.concurrent.duration.DurationInt
 import services.*
-// import services.kafka.consumers.QuestCreatedConsumer
-// import services.kafka.producers.*
 
 object Main extends IOApp {
 
@@ -48,21 +47,19 @@ object Main extends IOApp {
   override def run(args: List[String]): IO[ExitCode] = {
 
     val serverResource: Resource[IO, Server] = for {
-      config <- Resource.eval(ConfigReader[IO].loadAppConfig)
-      transactor <- DatabaseModule.make[IO](config)
-      redis <- RedisModule.make[IO](config)
-      // kafkaProducers <- KafkaModule.make[IO](config)
+      appConfig <- Resource.eval(ConfigReader[IO].loadAppConfig)
+      transactor <- DatabaseModule.make[IO](appConfig)
+      redis <- RedisModule.make[IO](appConfig)
       httpClient <- HttpClientModule.make[IO]
+      questConnector = QuestConnector[IO](httpClient, uri"http://localhost:8082")
       httpApp <- HttpModule.make(
-        config,
-        transactor,
-        redis,
+        appConfig,
         httpClient,
-        // kafkaProducers
+        transactor,
+        questConnector
       )
-      // _ <- BackgroundJobsModule.runAll(transactor, config, kafkaProducers.questEstimationProducer)
-      host <- Resource.eval(IO.fromOption(Host.fromString(config.serverConfig.host))(new RuntimeException("Invalid host in configuration")))
-      port <- Resource.eval(IO.fromOption(Port.fromInt(config.serverConfig.port))(new RuntimeException("Invalid port in configuration")))
+      host <- Resource.eval(IO.fromOption(Host.fromString(appConfig.serverConfig.host))(new RuntimeException("Invalid host in configuration")))
+      port <- Resource.eval(IO.fromOption(Port.fromInt(appConfig.serverConfig.port))(new RuntimeException("Invalid port in configuration")))
       server <- EmberServerBuilder
         .default[IO]
         .withHost(host)

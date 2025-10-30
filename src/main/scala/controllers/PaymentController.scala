@@ -95,17 +95,17 @@ class PaymentControllerImpl[F[_] : Async : Concurrent : Logger](
             Unauthorized(`WWW-Authenticate`(Challenge("Bearer", "api")), "Missing Bearer token")
       }
 
-    // Stripe sends webhooks here  - Not used
-    case req @ POST -> Root / "stripe" / "webhook" =>
-      for {
-        payload <- req.as[String]
-        sigHeader <- req.headers
-          .get(CIString("Stripe-Signature"))
-          .map(_.head.value)
-          .liftTo[F](new Exception("Missing Stripe-Signature header"))
-        _ <- paymentService.handleStripeWebhook(payload, sigHeader)
-        resp <- Ok("Webhook handled")
-      } yield resp
+    // Stripe sends webhooks here  - Not used TODO: Investigate if we can remove
+    // case req @ POST -> Root / "stripe" / "webhook" =>
+    //   for {
+    //     payload <- req.as[String]
+    //     sigHeader <- req.headers
+    //       .get(CIString("Stripe-Signature"))
+    //       .map(_.head.value)
+    //       .liftTo[F](new Exception("Missing Stripe-Signature header"))
+    //     _ <- paymentService.handleStripeWebhook(payload, sigHeader)
+    //     resp <- Ok("Webhook handled")
+    //   } yield resp
 
     // Stripe Checkout we use this payment option
     case req @ POST -> Root / "stripe" / "checkout" / clientId / questId =>

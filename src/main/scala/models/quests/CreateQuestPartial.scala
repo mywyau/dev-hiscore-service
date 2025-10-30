@@ -1,15 +1,14 @@
 package models.quests
 
-import io.circe.Decoder
-import io.circe.Encoder
 import io.circe.generic.semiauto.deriveDecoder
 import io.circe.generic.semiauto.deriveEncoder
-import models.Rank
-import models.languages.Language
-
+import io.circe.Decoder
+import io.circe.Encoder
 import java.time.LocalDateTime
+import models.languages.Language
+import models.Rank
 
-case class CreateQuestPartial(
+case class CreateQuestData(
   rank: Rank,
   title: String,
   description: Option[String],
@@ -17,7 +16,7 @@ case class CreateQuestPartial(
   tags: Seq[Language]
 )
 
-object CreateQuestPartial {
-  implicit val encoder: Encoder[CreateQuestPartial] = deriveEncoder[CreateQuestPartial]
-  implicit val decoder: Decoder[CreateQuestPartial] = deriveDecoder[CreateQuestPartial]
+object CreateQuestData {
+  implicit val encoder: Encoder[CreateQuestData] = deriveEncoder[CreateQuestData]
+  implicit val decoder: Decoder[CreateQuestData] = deriveDecoder[CreateQuestData]
 }

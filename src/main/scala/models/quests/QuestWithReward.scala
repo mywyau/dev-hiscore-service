@@ -11,7 +11,7 @@ import models.QuestStatus
 import models.Rank
 
 case class QuestWithReward(
-  quest: QuestPartial,
+  quest: QuestData,
   reward: Option[RewardData]
 )
 

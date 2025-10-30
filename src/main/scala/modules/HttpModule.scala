@@ -5,10 +5,10 @@ import cats.syntax.all.*
 import cats.Parallel
 import com.comcast.ip4s.*
 import configuration.AppConfig
+import connectors.QuestConnector
 import dev.profunktor.redis4cats.RedisCommands
 import doobie.hikari.HikariTransactor
 import middleware.Middleware
-// import modules.KafkaProducers
 import org.http4s.client.Client
 import org.http4s.headers.Origin
 import org.http4s.server.middleware.CORS
@@ -51,40 +51,30 @@ object HttpModule {
 
   private def allRoutes[F[_] : Async : Parallel : Logger](
     appConfig: AppConfig,
-    transactor: HikariTransactor[F],
-    redisHost: String,
-    redisPort: Int,
-    redis: RedisCommands[F, String, String],
-    httpClient: Client[F]
-    // kafkaProducers: KafkaProducers[F]
+    httpClient: Client[F],
+    questConnector: QuestConnector[F],
+    transactor: HikariTransactor[F]
   ): HttpRoutes[F] =
     Router(
       "/dev-irl-client-payment-service" -> (
         Routes.baseRoutes() <+>
-          Routes.paymentRoutes(redisHost, redisPort, transactor, appConfig, httpClient)
+          Routes.paymentRoutes(appConfig, httpClient, questConnector, transactor)
       )
     )
 
   def make[F[_] : Async : Parallel : Logger](
     appConfig: AppConfig,
+    httpClient: Client[F],
     transactor: HikariTransactor[F],
-    redis: RedisCommands[F, String, String],
-    httpClient: Client[F]
-    // kafkaProducers: KafkaProducers[F]
+    questConnector: QuestConnector[F]
   ): Resource[F, HttpApp[F]] = {
-
-    val redisHost = appConfig.redisConfig.host
-    val redisPort = appConfig.redisConfig.port
 
     val rawRoutes =
       allRoutes(
         appConfig = appConfig,
-        transactor = transactor,
-        redisHost = redisHost,
-        redisPort = redisPort,
-        redis = redis,
+        questConnector = questConnector,
         httpClient = httpClient,
-        // kafkaProducers
+        transactor = transactor
       )
 
     val withCors =

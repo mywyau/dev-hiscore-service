@@ -7,6 +7,8 @@ import cats.effect.IO
 import cats.implicits.*
 import com.stripe.net.Webhook
 import configuration.AppConfig
+import connectors.QuestConnector
+import connectors.RewardsConnector
 import io.circe.parser
 import io.circe.syntax.EncoderOps
 import io.circe.Json
@@ -21,8 +23,8 @@ import org.http4s.syntax.all.uri
 import org.http4s.Header
 import org.typelevel.ci.CIStringSyntax
 import org.typelevel.log4cats.Logger
-import repositories.*
 import services.*
+import connectors.QuestConnectorAlgebra
 
 trait PaymentServiceAlgebra[F[_]] {
 
@@ -45,10 +47,9 @@ trait PaymentServiceAlgebra[F[_]] {
   ): F[CheckoutSessionUrl]
 }
 
-class LivePaymentService[F[_] : Async : Logger](
-  stripePaymentService: StripePaymentService[F],
-  questRepo: QuestRepositoryAlgebra[F],
-  rewardRepo: RewardRepositoryAlgebra[F]
+class LivePaymentServiceImpl[F[_] : Async : Logger](
+  questConnector: QuestConnectorAlgebra[F],
+  stripePaymentService: StripePaymentServiceAlgebra[F]
 ) extends PaymentServiceAlgebra[F] {
 
   override def createQuestPayment(
@@ -59,7 +60,7 @@ class LivePaymentService[F[_] : Async : Logger](
   ): F[StripePaymentIntent] =
     for {
       _ <- Logger[F].debug(s"[LivePaymentService][createQuestPayment] Creating payment intent for quest [$questId] by client [$clientId]")
-      _ <- questRepo.validateOwnership(questId, clientId)
+      _ <- questConnector.validateOwnership(questId, clientId)
       intent <- stripePaymentService.createPaymentIntent(
         amount = amountCents,
         currency = "usd",
@@ -87,7 +88,7 @@ class LivePaymentService[F[_] : Async : Logger](
             case Some(questId) =>
               for {
                 _ <- Logger[F].debug(s"[LivePaymentService][handleStripeWebhook] Payment succeeded for quest [$questId]")
-                _ <- questRepo.markPaid(questId)
+                _ <- questConnector.markPaid(questId)
               } yield ()
             case None =>
               Logger[F].warn("[LivePaymentService][handleStripeWebhook] No questId found in payment metadata")
@@ -105,7 +106,7 @@ class LivePaymentService[F[_] : Async : Logger](
     amountCents: Long
   ): F[CheckoutSessionUrl] = for {
     _ <- Logger[F].debug(s"[LivePaymentService][createCheckoutSession] Creating checkout session for quest [$questId] by client [$clientId]")
-    _ <- questRepo.validateOwnership(questId, clientId)
+    _ <- questConnector.validateOwnership(questId, clientId)
     _ <- Logger[F].debug(s"[LivePaymentService][createCheckoutSession] Passed ownership validation check [$questId] by client [$clientId]")
     session <- stripePaymentService.createCheckoutSession(
       questId = questId,

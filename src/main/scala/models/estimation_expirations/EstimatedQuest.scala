@@ -5,10 +5,10 @@ import io.circe.generic.semiauto.deriveEncoder
 import io.circe.Decoder
 import io.circe.Encoder
 import java.time.Instant
-import models.quests.QuestPartial
+import models.quests.QuestData
 
 case class EstimatedQuest(
-  quest: QuestPartial,
+  quest: QuestData,
   estimationCloseAt: Option[Instant]
 )
 
