@@ -23,7 +23,7 @@ object LocalAppConfigConstants {
   val kafkaConfig =
     KafkaConfig(
       bootstrapServers = "localhost:9092",
-      clientId = "dev-irl-client-payment-service",
+      clientId = "dev-irl-hiscore-service",
       acks = "all",
       lingerMs = 5,
       retries = 10,

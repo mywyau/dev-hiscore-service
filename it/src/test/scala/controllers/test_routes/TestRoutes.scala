@@ -9,6 +9,7 @@ import cats.NonEmptyParallel
 import configuration.AppConfig
 import configuration.BaseAppConfig
 import connectors.QuestConnector
+import controllers.mocks.*
 import controllers.BaseController
 import controllers.PaymentControllerImpl
 import dev.profunktor.redis4cats.RedisCommands
@@ -24,18 +25,17 @@ import models.auth.UserSession
 import models.events.QuestCreatedEvent
 import models.kafka.KafkaProducerResult
 import models.kafka.SuccessfulWrite
+import modules.HttpClientModule
 import org.http4s.client.Client
 import org.http4s.server.Router
 import org.http4s.HttpRoutes
 import org.http4s.Uri
 import org.typelevel.log4cats.slf4j.Slf4jLogger
+import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.SelfAwareStructuredLogger
 import repositories.*
 import services.*
 import services.stripe.*
-import org.typelevel.log4cats.Logger
-import modules.HttpClientModule
-import controllers.mocks.*
 
 object TestRoutes extends BaseAppConfig {
 
@@ -72,15 +72,14 @@ object TestRoutes extends BaseAppConfig {
         s"auth:session:USER007" -> fakeUserSession("USER007"),
         s"auth:session:USER009" -> fakeUserSession("USER009"),
         s"auth:session:USER010" -> fakeUserSession("USER010"),
-        s"auth:session:CLIENT001" -> fakeUserSession("CLIENT001"),
+        s"auth:session:CLIENT001" -> fakeUserSession("CLIENT001")
       )
     )
 
   def paymentRoutes(
     appConfig: AppConfig,
     transactor: HikariTransactor[IO]
-  ): Resource[IO, HttpRoutes[IO]] = {
-
+  ): Resource[IO, HttpRoutes[IO]] =
     for {
       mockedSessionRef <- Resource.eval(mockAuthCachedSessions)
       mockSessionCache = new MockSessionCache(mockedSessionRef)
@@ -88,19 +87,14 @@ object TestRoutes extends BaseAppConfig {
       mockStripePaymentService = new MockStripePaymentService[IO]
       paymentService = new LivePaymentServiceImpl(mockQuestConnector, mockStripePaymentService)
       paymentController = new PaymentControllerImpl(paymentService, mockSessionCache)
-    } yield {
-      paymentController.routes
-    }
-  }
+    } yield paymentController.routes
 
-  def createTestRouter(appConfig: AppConfig, transactor: HikariTransactor[IO]): Resource[IO, HttpRoutes[IO]] = {
-
+  def createTestRouter(appConfig: AppConfig, transactor: HikariTransactor[IO]): Resource[IO, HttpRoutes[IO]] =
     for {
       paymentRoutes <- paymentRoutes(appConfig, transactor)
     } yield Router(
-      "/dev-irl-client-payment-service" -> (
+      "/dev-irl-hiscore-service" -> (
         baseRoutes() <+> paymentRoutes
       )
     )
-  }
 }

@@ -1,25 +1,26 @@
 package modules
 
+import cats.Parallel
 import cats.effect.*
 import cats.syntax.all.*
-import cats.Parallel
 import com.comcast.ip4s.*
 import configuration.AppConfig
 import connectors.QuestConnector
 import dev.profunktor.redis4cats.RedisCommands
 import doobie.hikari.HikariTransactor
 import middleware.Middleware
-import org.http4s.client.Client
-import org.http4s.headers.Origin
-import org.http4s.server.middleware.CORS
-import org.http4s.server.Router
 import org.http4s.HttpApp
 import org.http4s.HttpRoutes
 import org.http4s.Method
 import org.http4s.Uri
+import org.http4s.client.Client
+import org.http4s.headers.Origin
+import org.http4s.server.Router
+import org.http4s.server.middleware.CORS
 import org.typelevel.ci.CIString
 import org.typelevel.log4cats.Logger
 import routes.*
+
 import scala.concurrent.duration.*
 
 object HttpModule {
@@ -56,9 +57,8 @@ object HttpModule {
     transactor: HikariTransactor[F]
   ): HttpRoutes[F] =
     Router(
-      "/dev-irl-client-payment-service" -> (
-        Routes.baseRoutes() <+>
-          Routes.paymentRoutes(appConfig, httpClient, questConnector, transactor)
+      "/dev-irl-hiscore-service" -> (
+        Routes.baseRoutes()
       )
     )
 

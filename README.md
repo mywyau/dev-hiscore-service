@@ -1,4 +1,4 @@
-# dev-irl-client-payment-service
+# dev-irl-hiscore-service
 
 This Backend service is responsible for business domain data e.g. businesses, offices and desks.
 
@@ -129,7 +129,6 @@ We can use httpie instead of curl to trigger our endpoints.
 sbt docker:publishLocal
 ```
 
-
 ### Stripe webhook local testing
 
 ```
@@ -137,7 +136,7 @@ stripe login
 ```
 
 ```
-stripe listen --forward-to localhost:8080/dev-irl-client-payment-service/billing/webhook
+stripe listen --forward-to localhost:8080/dev-irl-hiscore-service/billing/webhook
 ```
 
 ### Mermaid Wireframe Diagrams

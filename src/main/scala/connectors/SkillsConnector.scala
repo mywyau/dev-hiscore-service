@@ -2,20 +2,30 @@ package connectors
 
 import cats.effect.kernel.Async
 import cats.syntax.all.*
-import io.circe.parser.decode
 import io.circe.Decoder
+import io.circe.parser.decode
 import models.skills.*
 import org.http4s.*
+import org.http4s.Method.*
 import org.http4s.circe.*
 import org.http4s.client.Client
-import org.http4s.Method.*
 import org.typelevel.log4cats.Logger
 
 trait SkillsConnectorAlgebra[F[_]] {
 
-  def getSkill(userId: String): F[Option[SkillData]]
+  def getSkill(userId: String, skill: Skill): F[Option[SkillData]]
 
-  def getAllSkillData(userId: String): F[List[SkillData]]
+  def getAllSkillData(): F[List[SkillData]]
+
+  def awardSkillXP(
+    devId: String,
+    username: String,
+    skill: Skill,
+    xp: BigDecimal,
+    level: Int,
+    nextLevel: Int,
+    nextLevelXp: BigDecimal
+  ): F[List[SkillData]]
 }
 
 final class SkillsConnectorImpl[F[_] : Async : Logger](
@@ -23,7 +33,7 @@ final class SkillsConnectorImpl[F[_] : Async : Logger](
   baseUri: Uri
 ) {
 
-  def getSkillsData(userId: String): F[Option[SkillData]] = {
+  def getSkillsData(userId: String, skill: Skill): F[Option[SkillData]] = {
     val request = Request[F](
       method = GET,
       uri = baseUri / "skills" / userId
@@ -43,15 +53,15 @@ final class SkillsConnectorImpl[F[_] : Async : Logger](
     } yield response
   }
 
-    def getAllSkillData(userId: String): F[List[SkillData]] = {
-      
+  def getAllSkillData(): F[List[SkillData]] = {
+
     val request = Request[F](
       method = GET,
-      uri = baseUri / "skills" / userId
+      uri = baseUri / "skills" / "all"
     )
 
     for {
-      _ <- Logger[F].info(s"[SkillsConnector][getSkillsData] - Fetching Skills data for $userId")
+      _ <- Logger[F].info(s"[SkillsConnector][getSkillsData] - Fetching all Skills data")
       response <- client.run(request).use { resp =>
         if (resp.status.isSuccess)
           resp
@@ -62,6 +72,17 @@ final class SkillsConnectorImpl[F[_] : Async : Logger](
       }
     } yield response
   }
+
+  def awardSkillXP(
+    devId: String,
+    username: String,
+    skill: Skill,
+    xp: BigDecimal,
+    level: Int,
+    nextLevel: Int,
+    nextLevelXp: BigDecimal
+  ): F[List[SkillData]] = ???
+
 }
 
 object SkillsConnector {

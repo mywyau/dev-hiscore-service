@@ -89,10 +89,10 @@ class LevelServiceImpl[F[_] : Concurrent : Logger](
   override def calculateXpForLevel(level: Int): Option[Int] =
     levelThresholds.lift(level - 1)
 
-  override def getTotalLevelHiscores(userId): F[List[TotalLevel]] =
+  override def getTotalLevelHiscores(): F[List[TotalLevel]] =
     for {
-      skillData: List[SkillData] <- skillsConnector.getAllSkillData(userId)
-      languageData: List[LanguageData] <- languageConnector.getAllLanguageData(userId)
+      skillData: List[SkillData] <- skillsConnector.getAllSkillData()
+      languageData: List[LanguageData] <- languageConnector.getAllLanguageData()
 
       // Group and sum skill data
       skillTotals = skillData
@@ -138,29 +138,29 @@ class LevelServiceImpl[F[_] : Concurrent : Logger](
   override def getPaginatedTotalLevelHiscores(offset: Int, limit: Int): F[List[TotalLevel]] =
     getTotalLevelHiscores().map(_.slice(offset, offset + limit))
 
-  override def awardSkillXpWithLevel(
-    devId: String,
-    username: String,
-    skill: Skill,
-    xpToAdd: BigDecimal
-  ): F[ValidatedNel[DatabaseErrors, DatabaseSuccess]] =
-    for {
-      maybeSkill <- skillsConnector.getSkill(devId, skill)
-      currentXp = maybeSkill.map(_.xp).getOrElse(BigDecimal(0))
-      newTotalXp = currentXp + xpToAdd
-      newLevel = calculateLevel(newTotalXp)
-      nextLevel = newLevel + 1
-      nextLevelXp = levelThresholds.lift(newLevel).getOrElse(levelThresholds.last)
-      result <- skillsConnector.awardSkillXP(
-        devId,
-        username,
-        skill,
-        newTotalXp,
-        newLevel,
-        nextLevel,
-        nextLevelXp
-      )
-    } yield result
+  // override def awardSkillXpWithLevel(
+  //   devId: String,
+  //   username: String,
+  //   skill: Skill,
+  //   xpToAdd: BigDecimal
+  // ): F[ValidatedNel[DatabaseErrors, DatabaseSuccess]] =
+  //   for {
+  //     maybeSkill <- skillsConnector.getSkill(devId, skill)
+  //     currentXp = maybeSkill.map(_.xp).getOrElse(BigDecimal(0))
+  //     newTotalXp = currentXp + xpToAdd
+  //     newLevel = calculateLevel(newTotalXp)
+  //     nextLevel = newLevel + 1
+  //     nextLevelXp = levelThresholds.lift(newLevel).getOrElse(levelThresholds.last)
+  //     result <- skillsConnector.awardSkillXP(
+  //       devId,
+  //       username,
+  //       skill,
+  //       newTotalXp,
+  //       newLevel,
+  //       nextLevel,
+  //       nextLevelXp
+  //     )
+  //   } yield result
 
   override def awardLanguageXpWithLevel(
     devId: String,

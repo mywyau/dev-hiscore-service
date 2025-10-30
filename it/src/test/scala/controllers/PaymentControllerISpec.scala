@@ -36,27 +36,27 @@ class PaymentControllerISpec(global: GlobalRead) extends IOSuite with Controller
     } yield (transactor, client)
 
   test(
-    "GET - /dev-irl-client-payment-service/payment/health -  health check should return the health response"
+    "GET - /dev-irl-hiscore-service/payment/health -  health check should return the health response"
   ) { (transactorResource, log) =>
 
     val transactor = transactorResource._1.xa
     val client = transactorResource._2.client
 
     val request =
-      Request[IO](GET, uri"http://127.0.0.1:9999/dev-irl-client-payment-service/payment/health")
+      Request[IO](GET, uri"http://127.0.0.1:9999/dev-irl-hiscore-service/payment/health")
 
     client.run(request).use { response =>
       response.as[GetResponse].map { body =>
         expect.all(
           response.status == Status.Ok,
-          body == GetResponse("/dev-irl-client-payment-service/payment/health", "I am alive - PaymentController")
+          body == GetResponse("/dev-irl-hiscore-service/payment/health", "I am alive - PaymentController")
         )
       }
     }
   }
 
   test(
-    "GET - /dev-irl-client-payment-service/stripe/checkout - should return a checkout session url if the client id and quest id is valid"
+    "GET - /dev-irl-hiscore-service/stripe/checkout - should return a checkout session url if the client id and quest id is valid"
   ) { (transactorResource, log) =>
 
     val transactor = transactorResource._1.xa
@@ -71,7 +71,7 @@ class PaymentControllerISpec(global: GlobalRead) extends IOSuite with Controller
       )
 
     val request =
-      Request[IO](POST, uri"http://127.0.0.1:9999/dev-irl-client-payment-service/stripe/checkout/CLIENT001/QUEST001")
+      Request[IO](POST, uri"http://127.0.0.1:9999/dev-irl-hiscore-service/stripe/checkout/CLIENT001/QUEST001")
         .addCookie("auth_session", sessionToken)
         .withEntity(requestBody().asJson)
 
@@ -86,7 +86,7 @@ class PaymentControllerISpec(global: GlobalRead) extends IOSuite with Controller
   }
 
   test(
-    "POST - /dev-irl-client-payment-service/stripe/checkout - should return a checkout session url if the client id and quest id is valid"
+    "POST - /dev-irl-hiscore-service/stripe/checkout - should return a checkout session url if the client id and quest id is valid"
   ) { (transactorResource, log) =>
 
     val transactor = transactorResource._1.xa
@@ -101,7 +101,7 @@ class PaymentControllerISpec(global: GlobalRead) extends IOSuite with Controller
       )
 
     val request =
-      Request[IO](POST, uri"http://127.0.0.1:9999/dev-irl-client-payment-service/stripe/checkout/CLIENT001/QUEST001")
+      Request[IO](POST, uri"http://127.0.0.1:9999/dev-irl-hiscore-service/stripe/checkout/CLIENT001/QUEST001")
         .addCookie("auth_session", sessionToken)
         .withEntity(requestBody().asJson)
 
