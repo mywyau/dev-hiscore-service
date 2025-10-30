@@ -14,8 +14,6 @@ import connectors.*
 import fs2.Stream
 import java.util.UUID
 import models.database.*
-import models.database.DatabaseErrors
-import models.database.DatabaseSuccess
 import models.users.*
 import models.UserType
 import org.typelevel.log4cats.Logger
