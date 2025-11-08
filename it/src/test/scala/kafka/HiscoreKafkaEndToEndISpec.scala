@@ -2,6 +2,7 @@ package kafka
 
 import cats.effect.*
 import cats.syntax.all.*
+import consumers.HiscoreConsumerService
 import fs2.kafka.*
 import io.circe.syntax.*
 import models.events.QuestCreatedEvent
@@ -13,8 +14,6 @@ import weaver.*
 
 import java.time.Instant
 import scala.concurrent.duration.*
-import consumers.HiscoreConsumerService
-
 
 object HiscoreKafkaEndToEndISpec extends IOSuite {
 
@@ -28,8 +27,21 @@ object HiscoreKafkaEndToEndISpec extends IOSuite {
         .withBootstrapServers("localhost:9092")
     )
 
+  private def resetKafkaTopic(topic: String): IO[Unit] =
+    IO.blocking {
+      import sys.process._
+      s"docker exec kafka-container-redpanda-1 rpk topic create $topic --brokers localhost:9092".!
+    }.void
+
+  private def deleteTopic(topic: String): IO[Unit] =
+    IO.blocking {
+      import sys.process._
+      s"docker exec kafka-container-redpanda-1 rpk topic delete $topic --brokers localhost:9092".!
+    }.void
+
   test("HiscoreConsumer should consume a skill.updated event successfully") { producer =>
-    val topic = s"skill.updated.test.${System.currentTimeMillis()}"
+
+    val topic = s"skill.updated.test"
 
     val event = SkillUpdatedEvent(
       userId = "user123",
@@ -57,11 +69,13 @@ object HiscoreKafkaEndToEndISpec extends IOSuite {
 
     // 🔹 Run the consumer concurrently and send an event
     for {
+      _ <- resetKafkaTopic(topic)
       fiber <- consumer.stream.compile.drain.start
       _ <- IO.sleep(1.second) // wait for subscription
       _ <- producerSend
       _ <- IO.sleep(1.second) // allow processing
       _ <- fiber.cancel
+      _ <- deleteTopic(topic)
     } yield success
   }
 }
