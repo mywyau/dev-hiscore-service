@@ -11,7 +11,6 @@ import configuration.BaseAppConfig
 import connectors.QuestConnector
 import controllers.mocks.*
 import controllers.BaseController
-import controllers.PaymentControllerImpl
 import dev.profunktor.redis4cats.RedisCommands
 import doobie.hikari.HikariTransactor
 import doobie.util.transactor.Transactor
@@ -33,9 +32,7 @@ import org.http4s.Uri
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.SelfAwareStructuredLogger
-import repositories.*
 import services.*
-import services.stripe.*
 
 object TestRoutes extends BaseAppConfig {
 
@@ -50,9 +47,6 @@ object TestRoutes extends BaseAppConfig {
       userType = "Dev"
     )
   }
-
-  // val mockQuestConnector = new MockQuestConnector()
-  // val mockStripePaymentService = new MockStripePaymentService()
 
   def baseRoutes(): HttpRoutes[IO] = {
     val baseController = BaseController[IO]()
@@ -76,25 +70,17 @@ object TestRoutes extends BaseAppConfig {
       )
     )
 
-  def paymentRoutes(
+  def createTestRouter(
     appConfig: AppConfig,
     transactor: HikariTransactor[IO]
-  ): Resource[IO, HttpRoutes[IO]] =
-    for {
-      mockedSessionRef <- Resource.eval(mockAuthCachedSessions)
-      mockSessionCache = new MockSessionCache(mockedSessionRef)
-      mockQuestConnector = new MockQuestConnector[IO]
-      mockStripePaymentService = new MockStripePaymentService[IO]
-      paymentService = new LivePaymentServiceImpl(mockQuestConnector, mockStripePaymentService)
-      paymentController = new PaymentControllerImpl(paymentService, mockSessionCache)
-    } yield paymentController.routes
-
-  def createTestRouter(appConfig: AppConfig, transactor: HikariTransactor[IO]): Resource[IO, HttpRoutes[IO]] =
-    for {
-      paymentRoutes <- paymentRoutes(appConfig, transactor)
-    } yield Router(
-      "/dev-irl-hiscore-service" -> (
-        baseRoutes() <+> paymentRoutes
+  ): Resource[IO, HttpRoutes[IO]] = {
+    Resource.pure[IO, HttpRoutes[IO]](
+      Router(
+        "/dev-irl-hiscore-service" -> (
+          baseRoutes()
+          // Add more routes here later, e.g. hiscoreRoutes(), etc.
+        )
       )
     )
+  } 
 }
