@@ -4,17 +4,23 @@ import cats.effect.*
 import cats.syntax.all.*
 import fs2.kafka.*
 import io.circe.syntax.*
-import kafka.SkillUpdatedEvent
-import consumers.*
+import models.events.QuestCreatedEvent
+import models.kafka.*
+import org.typelevel.log4cats.SelfAwareStructuredLogger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
+import shared.KafkaProducerResource
 import weaver.*
+
+import java.time.Instant
 import scala.concurrent.duration.*
+import consumers.HiscoreConsumerService
+
 
 object HiscoreKafkaEndToEndISpec extends IOSuite {
 
-  implicit val logger = Slf4jLogger.getLogger[IO]
+  implicit val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.getLogger[IO]
 
-  type Res = KafkaProducer[String, String]
+  type Res = KafkaProducer[IO, String, String]
 
   def sharedResource: Resource[IO, Res] =
     KafkaProducer.resource(
@@ -42,19 +48,20 @@ object HiscoreKafkaEndToEndISpec extends IOSuite {
         .withAutoOffsetReset(AutoOffsetReset.Earliest)
 
     // 🔹 Create the consumer instance
-    val consumer = new HiscoreConsumerService[IO](
-      bootstrapServers = "localhost:9092",
-      firstTopic = topic,
-      topicNames = List.empty
-    )
+    val consumer =
+      new HiscoreConsumerService[IO](
+        bootstrapServers = "localhost:9092",
+        firstTopic = topic,
+        topicNames = List.empty
+      )
 
     // 🔹 Run the consumer concurrently and send an event
     for {
       fiber <- consumer.stream.compile.drain.start
-      _     <- IO.sleep(1.second) // wait for subscription
-      _     <- producerSend
-      _     <- IO.sleep(1.second) // allow processing
-      _     <- fiber.cancel
+      _ <- IO.sleep(1.second) // wait for subscription
+      _ <- producerSend
+      _ <- IO.sleep(1.second) // allow processing
+      _ <- fiber.cancel
     } yield success
   }
 }
