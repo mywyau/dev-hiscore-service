@@ -24,19 +24,4 @@ object Routes {
     baseController.routes
   }
 
-  def paymentRoutes[F[_] : Concurrent : Temporal : NonEmptyParallel : Async : Logger](
-    appConfig: AppConfig,
-    client: Client[F],
-    questConnector: QuestConnector[F],
-    transactor: HikariTransactor[F]
-  ): HttpRoutes[F] = {
-
-    val sessionCache = new SessionCacheImpl(appConfig)
-    val stripePaymentService = StripePaymentService(appConfig, client)
-    val paymentService = LivePaymentServiceImpl(questConnector, stripePaymentService)
-    val paymentController = new PaymentControllerImpl(paymentService, sessionCache)
-
-    paymentController.routes
-  }
-
 }

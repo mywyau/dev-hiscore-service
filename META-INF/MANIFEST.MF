@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Main-Class: Main
-Specification-Title: dev-irl-client-payment-service
+Specification-Title: dev-irl-hiscore-service
 Specification-Version: 0.1.0-SNAPSHOT
-Specification-Vendor: dev-irl-client-payment-service
-Implementation-Title: dev-irl-client-payment-service
+Specification-Vendor: dev-irl-hiscore-service
+Implementation-Title: dev-irl-hiscore-service
 Implementation-Version: 0.1.0-SNAPSHOT
-Implementation-Vendor: dev-irl-client-payment-service
-Implementation-Vendor-Id: dev-irl-client-payment-service
+Implementation-Vendor: dev-irl-hiscore-service
+Implementation-Vendor-Id: dev-irl-hiscore-service
 

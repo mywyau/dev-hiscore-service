@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: dev-irl-client-payment-service-app
+    container_name: dev-irl-hiscore-service-app
     environment:
       DB_HOST: postgres
       DB_PORT: 5432

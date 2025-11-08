@@ -9,8 +9,8 @@ import cats.NonEmptyParallel
 import configuration.AppConfig
 import configuration.BaseAppConfig
 import connectors.QuestConnector
+import controllers.mocks.*
 import controllers.BaseController
-import controllers.PaymentControllerImpl
 import dev.profunktor.redis4cats.RedisCommands
 import doobie.hikari.HikariTransactor
 import doobie.util.transactor.Transactor
@@ -24,18 +24,15 @@ import models.auth.UserSession
 import models.events.QuestCreatedEvent
 import models.kafka.KafkaProducerResult
 import models.kafka.SuccessfulWrite
+import modules.HttpClientModule
 import org.http4s.client.Client
 import org.http4s.server.Router
 import org.http4s.HttpRoutes
 import org.http4s.Uri
 import org.typelevel.log4cats.slf4j.Slf4jLogger
-import org.typelevel.log4cats.SelfAwareStructuredLogger
-import repositories.*
-import services.*
-import services.stripe.*
 import org.typelevel.log4cats.Logger
-import modules.HttpClientModule
-import controllers.mocks.*
+import org.typelevel.log4cats.SelfAwareStructuredLogger
+import services.*
 
 object TestRoutes extends BaseAppConfig {
 
@@ -50,9 +47,6 @@ object TestRoutes extends BaseAppConfig {
       userType = "Dev"
     )
   }
-
-  // val mockQuestConnector = new MockQuestConnector()
-  // val mockStripePaymentService = new MockStripePaymentService()
 
   def baseRoutes(): HttpRoutes[IO] = {
     val baseController = BaseController[IO]()
@@ -72,35 +66,21 @@ object TestRoutes extends BaseAppConfig {
         s"auth:session:USER007" -> fakeUserSession("USER007"),
         s"auth:session:USER009" -> fakeUserSession("USER009"),
         s"auth:session:USER010" -> fakeUserSession("USER010"),
-        s"auth:session:CLIENT001" -> fakeUserSession("CLIENT001"),
+        s"auth:session:CLIENT001" -> fakeUserSession("CLIENT001")
       )
     )
 
-  def paymentRoutes(
+  def createTestRouter(
     appConfig: AppConfig,
     transactor: HikariTransactor[IO]
   ): Resource[IO, HttpRoutes[IO]] = {
-
-    for {
-      mockedSessionRef <- Resource.eval(mockAuthCachedSessions)
-      mockSessionCache = new MockSessionCache(mockedSessionRef)
-      mockQuestConnector = new MockQuestConnector[IO]
-      mockStripePaymentService = new MockStripePaymentService[IO]
-      paymentService = new LivePaymentServiceImpl(mockQuestConnector, mockStripePaymentService)
-      paymentController = new PaymentControllerImpl(paymentService, mockSessionCache)
-    } yield {
-      paymentController.routes
-    }
-  }
-
-  def createTestRouter(appConfig: AppConfig, transactor: HikariTransactor[IO]): Resource[IO, HttpRoutes[IO]] = {
-
-    for {
-      paymentRoutes <- paymentRoutes(appConfig, transactor)
-    } yield Router(
-      "/dev-irl-client-payment-service" -> (
-        baseRoutes() <+> paymentRoutes
+    Resource.pure[IO, HttpRoutes[IO]](
+      Router(
+        "/dev-irl-hiscore-service" -> (
+          baseRoutes()
+          // Add more routes here later, e.g. hiscoreRoutes(), etc.
+        )
       )
     )
-  }
+  } 
 }

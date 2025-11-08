@@ -5,7 +5,6 @@ import cats.syntax.all.*
 import io.circe.Decoder
 import io.circe.parser.decode
 import models.quests.*
-import models.users.*
 import org.http4s.*
 import org.http4s.Method.*
 import org.http4s.circe.*
