@@ -1,4 +1,4 @@
-package services.consumers
+package consumers
 
 import cats.effect.Async
 import cats.syntax.all.*
@@ -9,8 +9,8 @@ import kafka.{SkillUpdatedEvent, LanguageUpdatedEvent}
 import dev.profunktor.redis4cats.RedisCommands
 
 class HiscoreConsumerService[F[_]: Async: Logger](
-  redis: RedisCommands[F, String, String],
   bootstrapServers: String,
+  firstTopic: String,
   topicNames: List[String]
 ) {
 
@@ -23,7 +23,7 @@ class HiscoreConsumerService[F[_]: Async: Logger](
   def stream: fs2.Stream[F, Unit] =
     KafkaConsumer
       .stream(settings)
-      .subscribeTo(topicNames*)
+      .subscribeTo(firstTopic = firstTopic, remainingTopics = topicNames*)
       .records
       .evalMap { msg =>
         val json = msg.record.value
@@ -55,6 +55,5 @@ class HiscoreConsumerService[F[_]: Async: Logger](
   private def updateLeaderboard(userId: String, xp: Int, level: Int, category: String): F[Unit] =
     for {
       _ <- Logger[F].info(s"Updating leaderboard [$category] for user $userId -> XP=$xp, level=$level")
-      _ <- redis.hSet(s"hiscore:$category", userId, xp.toString)
     } yield ()
 }
